@@ -3,12 +3,13 @@
   href="http://download.ros.org/schema/package_format3.xsd"
   schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>rviz_resource_interfaces</name>
+  <name>resource_retriever_interfaces</name>
   <version>15.1.16</version>
   <description>ROS interfaces for working with resources like meshes.</description>
 
   <maintainer email="alejandro@openrobotics.org">Alejandro Hernandez Cordero</maintainer>
 
+  <author email="stoyang@intrinsic.ai">Stoyan Gaydarov</author>
   <author email="william@openrobotics.org">William Woodall</author>
   <author>Eloy Briceño</author>
 
