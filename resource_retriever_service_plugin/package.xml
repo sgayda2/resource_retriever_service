@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model
+  href="http://download.ros.org/schema/package_format3.xsd"
+  schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>resource_retriever_service_plugin</name>
+  <version>15.2.0</version>
+  <description>A resource retriever plugin that relies on talking to a service (specified by resource_retriever_interfaces) for retrieving resources like meshes.</description>
+
+  <maintainer email="stoyang@intrinsic.ai">Stoyan Gaydarov</maintainer>
+  <author email="william@openrobotics.org">William Woodall</author>
+  <author email="michael@openrobotics.org">Michael Carroll</author>
+
+  <license>BSD</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>resource_retriever</depend>
+  <depend>resource_retriever_interfaces</depend>
+  <depend>rclcpp</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
