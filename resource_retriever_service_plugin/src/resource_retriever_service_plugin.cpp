@@ -1,4 +1,4 @@
-// Copyright 2025 Open Source Robotics Foundation, Inc.
+// Copyright 2026 Open Source Robotics Foundation, Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "rviz_default_plugins/ros_resource_retriever.hpp"
+#include "resource_retriever_service_plugin/resource_retriever_service_plugin.hpp"
 
 #include <cinttypes>
 #include <memory>
@@ -43,27 +43,12 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/node.hpp>
 #include <resource_retriever/plugins/retriever_plugin.hpp>
-#include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
-#include <rviz_resource_interfaces/srv/get_resource.hpp>
+#include <resource_retriever_interfaces/srv/get_resource.hpp>
 
-rclcpp::Node::SharedPtr
-get_ros_node_from(
-  const rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr & weak_ros_iface)
+RosServiceResourceRetriever::RosServiceResourceRetriever(rclcpp::Node::SharedPtr ros_node)
+    : ros_node_(ros_node),
+      logger_(ros_node_->get_logger().get_child("ros_service_resource_retriever"))
 {
-  auto ros_iface = weak_ros_iface.lock();
-  if (!ros_iface) {
-    throw std::invalid_argument("ROS node abstraction interface not valid");
-  }
-  return ros_iface->get_raw_node();
-}
-
-RosResourceRetriever::RosResourceRetriever(
-  rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr weak_ros_iface)
-: ros_node_(get_ros_node_from(weak_ros_iface)),
-  logger_(ros_node_->get_logger().get_child("ros_resource_retriever"))
-{
-  this->logger_ = ros_node_->get_logger().get_child("ros_resource_retriever");
-
   // Create a client with a custom callback group that will not be included in the main executor.
   callback_group_ = ros_node_->create_callback_group(
     rclcpp::CallbackGroupType::MutuallyExclusive,
@@ -77,18 +62,18 @@ RosResourceRetriever::RosResourceRetriever(
   executor_.add_callback_group(callback_group_, ros_node_->get_node_base_interface());
 }
 
-std::string RosResourceRetriever::name()
+std::string RosServiceResourceRetriever::name()
 {
-  return "rviz_default_plugins::RosResourceRetriever";
+  return "resource_retriever_service_plugin::RosServiceResourceRetriever";
 }
 
-bool RosResourceRetriever::can_handle(const std::string & url)
+bool RosServiceResourceRetriever::can_handle(const std::string &url)
 {
   return !url.empty();
 }
 
 resource_retriever::ResourceSharedPtr
-RosResourceRetriever::get_shared(const std::string & url)
+RosServiceResourceRetriever::get_shared(const std::string &url)
 {
   RCLCPP_DEBUG(this->logger_, "Getting resource: %s", url.c_str());
 
@@ -133,7 +118,7 @@ RosResourceRetriever::get_shared(const std::string & url)
   auto res = result.get();
   std::shared_ptr<resource_retriever::Resource> memory_resource = nullptr;
   switch (res->status_code) {
-    case rviz_resource_interfaces::srv::GetResource::Response::OK:
+    case resource_retriever_interfaces::srv::GetResource::Response::OK:
       RCLCPP_DEBUG(
         this->logger_,
         "Received resource '%s' with etag '%s', caching and returning %zu bytes.",
@@ -144,7 +129,7 @@ RosResourceRetriever::get_shared(const std::string & url)
         std::make_shared<resource_retriever::Resource>(url, res->expanded_path, res->body);
       cached_resources_.insert({url, {res->etag, memory_resource}});
       return memory_resource;
-    case rviz_resource_interfaces::srv::GetResource::Response::NOT_MODIFIED:
+    case resource_retriever_interfaces::srv::GetResource::Response::NOT_MODIFIED:
       RCLCPP_DEBUG(
         this->logger_,
         "Resource '%s' with etag '%s' was not modified, returning cached value.",
@@ -162,7 +147,7 @@ RosResourceRetriever::get_shared(const std::string & url)
       }
       return it->second.second;
       break;
-    case rviz_resource_interfaces::srv::GetResource::Response::ERROR:
+    case resource_retriever_interfaces::srv::GetResource::Response::ERROR:
       RCLCPP_DEBUG(
         this->logger_,
         "Received an unexpected error when getting resource '%s': %s",

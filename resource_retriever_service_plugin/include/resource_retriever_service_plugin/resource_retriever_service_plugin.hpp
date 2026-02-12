@@ -1,4 +1,4 @@
-// Copyright 2025 Open Source Robotics Foundation, Inc.
+// Copyright 2026 Open Source Robotics Foundation, Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef RVIZ_DEFAULT_PLUGINS__ROS_RESOURCE_RETRIEVER_HPP_
-#define RVIZ_DEFAULT_PLUGINS__ROS_RESOURCE_RETRIEVER_HPP_
+#ifndef RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_
+#define RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_
 
 #include <string>
 #include <string_view>
@@ -41,33 +41,31 @@
 #include <rclcpp/logger.hpp>
 #include <rclcpp/node.hpp>
 #include <resource_retriever/plugins/retriever_plugin.hpp>
-#include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
-#include <rviz_resource_interfaces/srv/get_resource.hpp>
+#include <resource_retriever_interfaces/srv/get_resource.hpp>
 
-/// Plugin for resource_retriever that loads resources from a ROS interface.
-class RosResourceRetriever : public resource_retriever::plugins::RetrieverPlugin
+/// Plugin for resource_retriever that loads resources from a ROS service interface.
+class RosServiceResourceRetriever : public resource_retriever::plugins::RetrieverPlugin
 {
-  using GetResource = rviz_resource_interfaces::srv::GetResource;
+  using GetResource = resource_retriever_interfaces::srv::GetResource;
 
-  RosResourceRetriever() = delete;
+  RosServiceResourceRetriever() = delete;
 
   static constexpr std::string_view service_name = "/rviz/get_resource";
 
 public:
-  explicit RosResourceRetriever(
-    rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr weak_ros_iface);
+  explicit RosServiceResourceRetriever(rclcpp::Node::SharedPtr ros_node);
 
-  ~RosResourceRetriever() override = default;
+  ~RosServiceResourceRetriever() override = default;
 
   std::string name() override;
 
-  bool can_handle(const std::string & url) override;
+  bool can_handle(const std::string &url) override;
 
-  resource_retriever::ResourceSharedPtr get_shared(const std::string & url) override;
+  resource_retriever::ResourceSharedPtr get_shared(const std::string &url) override;
 
 private:
   // It should be safe to keep a shared pointer to the node here, because this
-  // plugin will be destroyed with the resource retriever in the marker display,
+  // plugin will be destroyed with the resource retriever it is used with,
   // which should be destroyed along before the node abstraction is destroyed.
   // Also, since we're keeping callback groups and clients around, we need to
   // ensure the node stays around too.
@@ -84,4 +82,4 @@ private:
   > cached_resources_;
 };
 
-#endif  // RVIZ_DEFAULT_PLUGINS__ROS_RESOURCE_RETRIEVER_HPP_
+#endif // RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_
