@@ -72,7 +72,25 @@ bool RosServiceResourceRetriever::can_handle(const std::string &url)
   }
 
   const size_t first_colon = url.find(":", service_uri_prefix.size());
-  return first_colon != std::string::npos && first_colon != service_uri_prefix.size() && url.find(":", first_colon + 1) == std::string::npos;
+  if (first_colon == std::string::npos)
+  {
+    RCLCPP_ERROR(this->logger_, "Malformed url: %s", url.data());
+    return false;
+  }
+
+  if (first_colon == service_uri_prefix.size())
+  {
+    RCLCPP_ERROR(this->logger_, "Malformed url: %s", url.data());
+    return false;
+  }
+
+  if (url.find(":", first_colon + 1) != std::string::npos)
+  {
+    RCLCPP_ERROR(this->logger_, "Malformed url: %s", url.data());
+    return false;
+  }
+
+  return true;
 }
 
 resource_retriever::ResourceSharedPtr
@@ -82,7 +100,7 @@ RosServiceResourceRetriever::get_shared(const std::string &url)
   const size_t colon_index = url.find(":", service_uri_prefix.size());
   if (colon_index == std::string::npos)
   {
-    RCLCPP_ERROR(this->logger_, "Malformed uri: %s", url.data());
+    RCLCPP_ERROR(this->logger_, "Malformed url: %s", url.data());
     return nullptr;
   }
 
@@ -90,7 +108,7 @@ RosServiceResourceRetriever::get_shared(const std::string &url)
                                  url.begin() + colon_index);
   if (service_name.empty())
   {
-    RCLCPP_ERROR(this->logger_, "Malformed uri: %s", url.data());
+    RCLCPP_ERROR(this->logger_, "Malformed url: %s", url.data());
     return nullptr;
   }
 
@@ -219,9 +237,10 @@ RosServiceResourceRetriever::getServiceClient(const std::string &service_name)
   if (!client_ptr)
   {
     client_ptr = ros_node_->create_client<resource_retriever_interfaces::srv::GetResource>(
-        service_name.data(),
+        service_name,
         rclcpp::ServicesQoS(),
         callback_group_);
+    client_ptr->wait_for_service(std::chrono::seconds(1));
   }
 
   return client_ptr;
