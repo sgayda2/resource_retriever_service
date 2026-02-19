@@ -30,6 +30,7 @@
 #ifndef RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_
 #define RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_
 
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -82,6 +83,7 @@ private:
     std::string,
     rclcpp::Client<GetResource>::SharedPtr
   > clients_;
+  std::mutex clients_mutex_;
 
   rclcpp::executors::SingleThreadedExecutor executor_;
   rclcpp::Logger logger_;

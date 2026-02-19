@@ -31,6 +31,7 @@
 
 #include <cinttypes>
 #include <memory>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -223,6 +224,7 @@ RosServiceResourceRetriever::get_shared(const std::string & url)
 rclcpp::Client<resource_retriever_interfaces::srv::GetResource>::SharedPtr
 RosServiceResourceRetriever::getServiceClient(const std::string & service_name)
 {
+  std::lock_guard<std::mutex> lock(clients_mutex_);
   auto & client_ptr = this->clients_[service_name];
   if (!client_ptr) {
     client_ptr = ros_node_->create_client<resource_retriever_interfaces::srv::GetResource>(
