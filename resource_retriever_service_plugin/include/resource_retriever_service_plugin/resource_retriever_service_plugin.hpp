@@ -43,6 +43,9 @@
 #include <resource_retriever/plugins/retriever_plugin.hpp>
 #include <resource_retriever_interfaces/srv/get_resource.hpp>
 
+namespace resource_retriever_service_plugin
+{
+
 /// Plugin for resource_retriever that loads resources from a ROS service interface.
 class RosServiceResourceRetriever : public resource_retriever::plugins::RetrieverPlugin
 {
@@ -59,12 +62,12 @@ public:
 
   std::string name() override;
 
-  bool can_handle(const std::string &url) override;
+  bool can_handle(const std::string & url) override;
 
-  resource_retriever::ResourceSharedPtr get_shared(const std::string &url) override;
+  resource_retriever::ResourceSharedPtr get_shared(const std::string & url) override;
 
 private:
-  rclcpp::Client<GetResource>::SharedPtr getServiceClient(const std::string &service_name);
+  rclcpp::Client<GetResource>::SharedPtr getServiceClient(const std::string & service_name);
 
   // It should be safe to keep a shared pointer to the node here, because this
   // plugin will be destroyed with the resource retriever it is used with,
@@ -76,20 +79,22 @@ private:
 
   // Maps between the server name and the client pointer that we use
   std::unordered_map<
-      std::string,
-      rclcpp::Client<GetResource>::SharedPtr>
-      clients_;
+    std::string,
+    rclcpp::Client<GetResource>::SharedPtr
+  > clients_;
 
   rclcpp::executors::SingleThreadedExecutor executor_;
   rclcpp::Logger logger_;
 
-  // Map of the resource path to a pair with the etag value and the memory resource that is cached.
+  // Maps [service name][resource path] => pair(etag, resource).
   std::unordered_map<
+    std::string,
+    std::unordered_map<
       std::string,
-      std::unordered_map<
-          std::string,
-          std::pair<std::string, resource_retriever::ResourceSharedPtr>>>
-      cached_resources_;
+      std::pair<std::string, resource_retriever::ResourceSharedPtr>>
+  > cached_resources_;
 };
+
+}  // namespace resource_retriever_service_plugin
 
 #endif  // RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_

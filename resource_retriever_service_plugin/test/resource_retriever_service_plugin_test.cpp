@@ -19,6 +19,11 @@
 
 #include "resource_retriever_service_plugin/resource_retriever_service_plugin.hpp"
 
+namespace resource_retriever_service_plugin
+{
+namespace
+{
+
 TEST(RosServiceResourceRetriever, GoodConstruction)
 {
   auto node = rclcpp::Node::make_shared("test_message_passing");
@@ -27,8 +32,9 @@ TEST(RosServiceResourceRetriever, GoodConstruction)
 
 TEST(RosServiceResourceRetriever, BadConstruction)
 {
-  EXPECT_EXIT(RosServiceResourceRetriever retriever(nullptr),
-              testing::KilledBySignal(SIGSEGV), "");
+  EXPECT_EXIT(
+    RosServiceResourceRetriever retriever(nullptr),
+    testing::KilledBySignal(SIGSEGV), "");
 }
 
 TEST(RosServiceResourceRetriever, CanHandleUri)
@@ -68,7 +74,10 @@ TEST(RosServiceResourceRetriever, BadGetSharedCall)
   EXPECT_EQ(nullptr, retriever.get_shared("service://a:b:c"));
 }
 
-int main(int argc, char **argv)
+}  // namespace
+}  // namespace resource_retriever_service_plugin
+
+int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
