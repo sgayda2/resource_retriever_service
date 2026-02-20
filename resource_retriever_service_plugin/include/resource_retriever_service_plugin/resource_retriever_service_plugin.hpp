@@ -30,6 +30,7 @@
 #ifndef RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_
 #define RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_
 
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -43,14 +44,17 @@
 #include <resource_retriever/plugins/retriever_plugin.hpp>
 #include <resource_retriever_interfaces/srv/get_resource.hpp>
 
+namespace resource_retriever_service_plugin
+{
+
 /// Plugin for resource_retriever that loads resources from a ROS service interface.
 class RosServiceResourceRetriever : public resource_retriever::plugins::RetrieverPlugin
 {
+  static constexpr std::string_view service_uri_prefix = "service://";
+  static constexpr std::string_view service_uri_deliminator = ":";
   using GetResource = resource_retriever_interfaces::srv::GetResource;
 
   RosServiceResourceRetriever() = delete;
-
-  static constexpr std::string_view service_name = "/rviz/get_resource";
 
 public:
   explicit RosServiceResourceRetriever(rclcpp::Node::SharedPtr ros_node);
@@ -59,11 +63,13 @@ public:
 
   std::string name() override;
 
-  bool can_handle(const std::string &url) override;
+  bool can_handle(const std::string & url) override;
 
-  resource_retriever::ResourceSharedPtr get_shared(const std::string &url) override;
+  resource_retriever::ResourceSharedPtr get_shared(const std::string & url) override;
 
 private:
+  rclcpp::Client<GetResource>::SharedPtr getServiceClient(const std::string & service_name);
+
   // It should be safe to keep a shared pointer to the node here, because this
   // plugin will be destroyed with the resource retriever it is used with,
   // which should be destroyed along before the node abstraction is destroyed.
@@ -71,15 +77,26 @@ private:
   // ensure the node stays around too.
   rclcpp::Node::SharedPtr ros_node_;
   rclcpp::CallbackGroup::SharedPtr callback_group_;
-  rclcpp::Client<GetResource>::SharedPtr client_;
+
+  // Maps between the server name and the client pointer that we use
+  std::unordered_map<
+    std::string,
+    rclcpp::Client<GetResource>::SharedPtr
+  > clients_;
+  std::mutex clients_mutex_;
+
   rclcpp::executors::SingleThreadedExecutor executor_;
   rclcpp::Logger logger_;
 
-  // Map of the resource path to a pair with the etag value and the memory resource that is cached.
+  // Maps [service name][resource path] => pair(etag, resource).
   std::unordered_map<
     std::string,
-    std::pair<std::string, resource_retriever::ResourceSharedPtr>
+    std::unordered_map<
+      std::string,
+      std::pair<std::string, resource_retriever::ResourceSharedPtr>>
   > cached_resources_;
 };
 
-#endif // RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_
+}  // namespace resource_retriever_service_plugin
+
+#endif  // RESOURCE_RETRIEVER_SERVICE_PLUGIN__RESOURCE_RETRIEVER_SERVICE_PLUGIN_HPP_

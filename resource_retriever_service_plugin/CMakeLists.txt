@@ -35,6 +35,20 @@ ament_export_dependencies(
   resource_retriever_interfaces
 )
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
+
+  ament_lint_auto_find_test_dependencies()
+
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wthread-safety)
+  endif()
+
+  ament_add_gtest(test_all test/resource_retriever_service_plugin_test.cpp)
+  target_link_libraries(test_all ${PROJECT_NAME})
+endif()
+
 install(
   TARGETS ${PROJECT_NAME}
   EXPORT ${PROJECT_NAME}
