@@ -232,7 +232,7 @@ RosServiceResourceRetriever::getServiceClient(const std::string & service_name)
       rclcpp::ServicesQoS(),
       callback_group_);
 
-    if (!client_ptr) {
+    if (client_ptr) {
       client_ptr->wait_for_service(std::chrono::seconds(1));
     }
   }
