@@ -38,6 +38,7 @@ ament_export_dependencies(
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_gmock REQUIRED)
 
   ament_lint_auto_find_test_dependencies()
 
@@ -45,7 +46,7 @@ if(BUILD_TESTING)
     add_compile_options(-Wthread-safety)
   endif()
 
-  ament_add_gtest(test_all test/resource_retriever_service_plugin_test.cpp)
+  ament_add_gmock(test_all test/resource_retriever_service_plugin_test.cpp)
   target_link_libraries(test_all ${PROJECT_NAME})
 endif()
 
