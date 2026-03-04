@@ -19,14 +19,24 @@
 #include <unordered_map>
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/node_interfaces/node_base_interface.hpp>
+#include <rclcpp/create_service.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/node_interfaces/node_services_interface.hpp>
 
 namespace resource_retriever_service
 {
 
 using resource_retriever_interfaces::srv::GetResource;
+using ResourceRetrieverServiceNodeType =
+    rclcpp::node_interfaces::NodeInterfaces<
+        rclcpp::node_interfaces::NodeBaseInterface,
+        rclcpp::node_interfaces::NodeLoggingInterface,
+        rclcpp::node_interfaces::NodeServicesInterface>;
 
 std::unique_ptr<ResourceRetrieverService> ResourceRetrieverService::Create(
-    std::shared_ptr<rclcpp::Node> node, std::string_view service_name) {
+    ResourceRetrieverService::NodeType node, std::string_view service_name) {
   std::unique_ptr<ResourceRetrieverService> service_impl(
       new ResourceRetrieverService(node));
   service_impl->Init(node, service_name);
@@ -34,16 +44,18 @@ std::unique_ptr<ResourceRetrieverService> ResourceRetrieverService::Create(
 }
 
 ResourceRetrieverService::ResourceRetrieverService(
-    std::shared_ptr<rclcpp::Node> node)
-    : logger_(node->get_logger().get_child("ros_resource_retriever_service")) {}
+    ResourceRetrieverService::NodeType node)
+    : logger_(node.get<rclcpp::node_interfaces::NodeLoggingInterface>()->get_logger().get_child("ros_resource_retriever_service")) {}
 
-void ResourceRetrieverService::Init(std::shared_ptr<rclcpp::Node> node, std::string_view service_name) {
-  service_ = node->create_service<GetResource>(
+void ResourceRetrieverService::Init(ResourceRetrieverService::NodeType node, std::string_view service_name) {
+  service_ = rclcpp::create_service<GetResource>(
+      node.get<rclcpp::node_interfaces::NodeBaseInterface>(),
+      node.get<rclcpp::node_interfaces::NodeServicesInterface>(),
       std::string(service_name),
       [this](const std::shared_ptr<GetResource::Request> request,
              std::shared_ptr<GetResource::Response> response) {
         this->Get(request, response);
-      });
+      }, rclcpp::ServicesQoS(), /*group=*/nullptr);
 }
 
 void ResourceRetrieverService::ClearResourceData() {

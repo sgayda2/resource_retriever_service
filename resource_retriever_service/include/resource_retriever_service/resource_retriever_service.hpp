@@ -17,7 +17,10 @@
 
 #include <memory>
 #include <rclcpp/logger.hpp>
-#include <rclcpp/node.hpp>
+#include <rclcpp/node_interfaces/node_base_interface.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/node_interfaces/node_services_interface.hpp>
 #include <rclcpp/service.hpp>
 #include <resource_retriever_interfaces/srv/get_resource.hpp>
 #include <shared_mutex>
@@ -33,10 +36,13 @@ namespace resource_retriever_service {
 class ResourceRetrieverService {
  public:
   static constexpr std::string_view kDefaultServiceName = "resource_provider";
+  using NodeType = rclcpp::node_interfaces::NodeInterfaces<
+      rclcpp::node_interfaces::NodeBaseInterface,
+      rclcpp::node_interfaces::NodeLoggingInterface,
+      rclcpp::node_interfaces::NodeServicesInterface>;
 
   static std::unique_ptr<ResourceRetrieverService> Create(
-      std::shared_ptr<rclcpp::Node> node,
-      std::string_view service_name = kDefaultServiceName);
+      NodeType node, std::string_view service_name = kDefaultServiceName);
 
   // Remove all resource data currently stored in the service.
   void ClearResourceData();
@@ -49,8 +55,10 @@ class ResourceRetrieverService {
   void UpdateResourceData(const std::string& resource_path,
                           std::vector<uint8_t> resource_data);
 
-  // Returns the etag value for the given resource path if one exists, nullopt otherwise
-  std::optional<std::string> GetEtagForResoucePath(const std::string& resource_path) const;
+  // Returns the etag value for the given resource path if one exists, nullopt
+  // otherwise
+  std::optional<std::string> GetEtagForResoucePath(
+      const std::string& resource_path) const;
 
  private:
   using GetResource = ::resource_retriever_interfaces::srv::GetResource;
@@ -58,8 +66,8 @@ class ResourceRetrieverService {
   void Get(const std::shared_ptr<GetResource::Request> request,
            std::shared_ptr<GetResource::Response> response);
 
-  explicit ResourceRetrieverService(std::shared_ptr<rclcpp::Node> node);
-  void Init(std::shared_ptr<rclcpp::Node> node, std::string_view service_name);
+  explicit ResourceRetrieverService(NodeType node);
+  void Init(NodeType node, std::string_view service_name);
 
   rclcpp::Service<GetResource>::SharedPtr service_ = nullptr;
   rclcpp::Logger logger_;

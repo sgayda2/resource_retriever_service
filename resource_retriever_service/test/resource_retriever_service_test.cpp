@@ -28,12 +28,7 @@ using ::resource_retriever_interfaces::srv::GetResource;
 
 TEST(ResourceRetrieverService, GoodConstruction) {
   auto node = rclcpp::Node::make_shared("test_service");
-  EXPECT_NE(ResourceRetrieverService::Create(node), nullptr);
-}
-
-TEST(ResourceRetrieverService, BadConstruction) {
-  EXPECT_EXIT(ResourceRetrieverService::Create(nullptr),
-              testing::KilledBySignal(SIGSEGV), "");
+  EXPECT_NE(ResourceRetrieverService::Create(*node), nullptr);
 }
 
 class ResourceRetrieverServiceTest : public ::testing::Test {
@@ -49,7 +44,7 @@ class ResourceRetrieverServiceTest : public ::testing::Test {
     executor_thread_ = std::make_unique<std::thread>(
         [executor = executor_.get()]() { executor->spin(); });
 
-    service_ = ResourceRetrieverService::Create(client_node_);
+    service_ = ResourceRetrieverService::Create(*client_node_);
 
     client_ = client_node_->create_client<GetResource>(
         std::string(ResourceRetrieverService::kDefaultServiceName));
