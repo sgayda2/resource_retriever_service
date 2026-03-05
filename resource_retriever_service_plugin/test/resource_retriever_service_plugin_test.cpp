@@ -35,20 +35,13 @@ using ::testing::Return;
 TEST(RosServiceResourceRetriever, GoodConstruction)
 {
   auto node = rclcpp::Node::make_shared("test_message_passing");
-  RosServiceResourceRetriever retriever(node);
-}
-
-TEST(RosServiceResourceRetriever, BadConstruction)
-{
-  EXPECT_EXIT(
-    RosServiceResourceRetriever retriever(nullptr),
-    testing::KilledBySignal(SIGSEGV), "");
+  RosServiceResourceRetriever retriever(*node);
 }
 
 TEST(RosServiceResourceRetriever, CanHandleUri)
 {
   auto node = rclcpp::Node::make_shared("test_get_shared");
-  RosServiceResourceRetriever retriever(node);
+  RosServiceResourceRetriever retriever(*node);
 
   EXPECT_FALSE(retriever.can_handle("something"));
   EXPECT_FALSE(retriever.can_handle("http://something"));
@@ -68,7 +61,7 @@ TEST(RosServiceResourceRetriever, CanHandleUri)
 TEST(RosServiceResourceRetriever, BadGetSharedCall)
 {
   auto node = rclcpp::Node::make_shared("test_get_shared");
-  RosServiceResourceRetriever retriever(node);
+  RosServiceResourceRetriever retriever(*node);
 
   EXPECT_EQ(nullptr, retriever.get_shared("something"));
   EXPECT_EQ(nullptr, retriever.get_shared("http://something"));
@@ -103,7 +96,7 @@ class RosServiceResourceRetrieverTest : public ::testing::Test {
                                                             request->etag);
         });
 
-      retriever_ = std::make_unique<RosServiceResourceRetriever>(client_node_);
+      retriever_ = std::make_unique<RosServiceResourceRetriever>(*client_node_);
     }
 
     void TearDown() override {

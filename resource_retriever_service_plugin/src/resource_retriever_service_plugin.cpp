@@ -40,26 +40,33 @@
 
 #include <rclcpp/callback_group.hpp>
 #include <rclcpp/client.hpp>
+#include <rclcpp/create_service.hpp>
 #include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/logger.hpp>
-#include <rclcpp/node.hpp>
+#include <rclcpp/node_interfaces/node_base_interface.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_graph_interface.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/node_interfaces/node_services_interface.hpp>
 #include <resource_retriever/plugins/retriever_plugin.hpp>
 #include <resource_retriever_interfaces/srv/get_resource.hpp>
 
 namespace resource_retriever_service_plugin
 {
 
-RosServiceResourceRetriever::RosServiceResourceRetriever(rclcpp::Node::SharedPtr ros_node)
+RosServiceResourceRetriever::RosServiceResourceRetriever(RosServiceResourceRetriever::NodeType ros_node)
 : ros_node_(ros_node),
-  logger_(ros_node_->get_logger().get_child("ros_service_resource_retriever"))
+  logger_(ros_node_.get<rclcpp::node_interfaces::NodeLoggingInterface>()
+              ->get_logger()
+              .get_child("ros_service_resource_retriever"))
 {
   // Create a client with a custom callback group that will not be included in the main executor.
-  callback_group_ = ros_node_->create_callback_group(
+  callback_group_ = ros_node_.get<rclcpp::node_interfaces::NodeBaseInterface>()->create_callback_group(
     rclcpp::CallbackGroupType::MutuallyExclusive,
     false);
 
   // Add the callback group to the executor so we can spin on it later.
-  executor_.add_callback_group(callback_group_, ros_node_->get_node_base_interface());
+  executor_.add_callback_group(callback_group_, ros_node_.get<rclcpp::node_interfaces::NodeBaseInterface>());
 }
 
 std::string RosServiceResourceRetriever::name()
@@ -227,7 +234,10 @@ RosServiceResourceRetriever::getServiceClient(const std::string & service_name)
   std::lock_guard<std::mutex> lock(clients_mutex_);
   auto & client_ptr = this->clients_[service_name];
   if (!client_ptr) {
-    client_ptr = ros_node_->create_client<resource_retriever_interfaces::srv::GetResource>(
+    client_ptr = rclcpp::create_client<resource_retriever_interfaces::srv::GetResource>(
+      ros_node_.get<rclcpp::node_interfaces::NodeBaseInterface>(),
+      ros_node_.get<rclcpp::node_interfaces::NodeGraphInterface>(),
+      ros_node_.get<rclcpp::node_interfaces::NodeServicesInterface>(),
       service_name,
       rclcpp::ServicesQoS(),
       callback_group_);
