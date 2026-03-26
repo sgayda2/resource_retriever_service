@@ -82,51 +82,54 @@ TEST(RosServiceResourceRetriever, BadGetSharedCall)
   EXPECT_EQ(nullptr, retriever.get_shared("service://a:b:c"));
 }
 
-class RosServiceResourceRetrieverTest : public ::testing::Test {
-  protected:
-    void SetUp() override {
-      executor_ = std::make_unique<rclcpp::executors::SingleThreadedExecutor>();
+class RosServiceResourceRetrieverTest : public ::testing::Test
+{
+protected:
+  void SetUp() override
+  {
+    executor_ = std::make_unique<rclcpp::executors::SingleThreadedExecutor>();
 
-      client_node_ = rclcpp::Node::make_shared("test_client_node");
-      server_node_ = rclcpp::Node::make_shared("test_server_node");
-      executor_->add_node(client_node_);
-      executor_->add_node(server_node_);
+    client_node_ = rclcpp::Node::make_shared("test_client_node");
+    server_node_ = rclcpp::Node::make_shared("test_server_node");
+    executor_->add_node(client_node_);
+    executor_->add_node(server_node_);
 
-      executor_thread_ = std::make_unique<std::thread>(
-        [executor = executor_.get()]() { executor->spin(); });
+    executor_thread_ = std::make_unique<std::thread>(
+      [executor = executor_.get()]() {executor->spin();});
 
-      service_ = server_node_->create_service<GetResource>(
-        "test_service",
-        [&](const std::shared_ptr<GetResource::Request> request,
-            std::shared_ptr<GetResource::Response> response) {
-          *response = mock_service_function_.AsStdFunction()(request->path,
-                                                            request->etag);
-        });
+    service_ = server_node_->create_service<GetResource>(
+      "test_service",
+      [&](const std::shared_ptr<GetResource::Request> request,
+      std::shared_ptr<GetResource::Response> response) {
+        *response = mock_service_function_.AsStdFunction()(request->path,
+        request->etag);
+      });
 
-      retriever_ = std::make_unique<RosServiceResourceRetriever>(client_node_);
-    }
+    retriever_ = std::make_unique<RosServiceResourceRetriever>(client_node_);
+  }
 
-    void TearDown() override {
-      executor_->cancel();
-      executor_thread_->join();
+  void TearDown() override
+  {
+    executor_->cancel();
+    executor_thread_->join();
 
-      retriever_.reset();
-      service_.reset();
-      server_node_.reset();
-      client_node_.reset();
-      executor_thread_.reset();
-      executor_.reset();
-    }
+    retriever_.reset();
+    service_.reset();
+    server_node_.reset();
+    client_node_.reset();
+    executor_thread_.reset();
+    executor_.reset();
+  }
 
-    std::unique_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
-    std::unique_ptr<std::thread> executor_thread_;
-    std::shared_ptr<rclcpp::Node> client_node_;
-    std::shared_ptr<rclcpp::Node> server_node_;
-    rclcpp::Service<GetResource>::SharedPtr service_;
-    std::unique_ptr<RosServiceResourceRetriever> retriever_;
+  std::unique_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
+  std::unique_ptr<std::thread> executor_thread_;
+  std::shared_ptr<rclcpp::Node> client_node_;
+  std::shared_ptr<rclcpp::Node> server_node_;
+  rclcpp::Service<GetResource>::SharedPtr service_;
+  std::unique_ptr<RosServiceResourceRetriever> retriever_;
 
-    MockFunction<GetResource::Response(const std::string&, const std::string&)>
-        mock_service_function_;
+  MockFunction<GetResource::Response(const std::string &, const std::string &)>
+  mock_service_function_;
 };
 
 TEST_F(RosServiceResourceRetrieverTest, SimpleE2EGet)
@@ -220,14 +223,14 @@ TEST_F(RosServiceResourceRetrieverTest, NotModifiedReturnsEmptyCachedValue)
 
 TEST_F(RosServiceResourceRetrieverTest, MultipleServices)
 {
-  MockFunction<GetResource::Response(const std::string&, const std::string&)>
-    mock_service_function2;
+  MockFunction<GetResource::Response(const std::string &, const std::string &)>
+  mock_service_function2;
   auto service2 = server_node_->create_service<GetResource>(
     "test_service2",
     [&](const std::shared_ptr<GetResource::Request> request,
-        std::shared_ptr<GetResource::Response> response) {
+    std::shared_ptr<GetResource::Response> response) {
       *response = mock_service_function2.AsStdFunction()(request->path,
-                                                         request->etag);
+      request->etag);
     });
 
   std::vector<uint8_t> resource_data1(2u, 3);

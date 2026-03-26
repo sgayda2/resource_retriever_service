@@ -16,6 +16,12 @@
 #define RESOURCE_RETRIEVER_SERVICE__RESOURCE_RETRIEVER_SERVICE_HPP_
 
 #include <memory>
+#include <shared_mutex>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include <rclcpp/logger.hpp>
 #include <rclcpp/node_interfaces/node_base_interface.hpp>
 #include <rclcpp/node_interfaces/node_interfaces.hpp>
@@ -23,48 +29,47 @@
 #include <rclcpp/node_interfaces/node_services_interface.hpp>
 #include <rclcpp/service.hpp>
 #include <resource_retriever_interfaces/srv/get_resource.hpp>
-#include <shared_mutex>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
-namespace resource_retriever_service {
+namespace resource_retriever_service
+{
 
 /// Implementation of the resource retriever service using an in memory map of
 /// meshes.
-class ResourceRetrieverService {
- public:
+class ResourceRetrieverService
+{
+public:
   static constexpr std::string_view kDefaultServiceName = "resource_provider";
   using NodeType = rclcpp::node_interfaces::NodeInterfaces<
-      rclcpp::node_interfaces::NodeBaseInterface,
-      rclcpp::node_interfaces::NodeLoggingInterface,
-      rclcpp::node_interfaces::NodeServicesInterface>;
+    rclcpp::node_interfaces::NodeBaseInterface,
+    rclcpp::node_interfaces::NodeLoggingInterface,
+    rclcpp::node_interfaces::NodeServicesInterface>;
 
   static std::unique_ptr<ResourceRetrieverService> Create(
-      NodeType node, std::string_view service_name = kDefaultServiceName);
+    NodeType node, std::string_view service_name = kDefaultServiceName);
 
   // Remove all resource data currently stored in the service.
   void ClearResourceData();
 
   // Update the stored resource data with the given map
   void SetResourceData(
-      std::unordered_map<std::string, std::vector<uint8_t>> resource_data);
+    std::unordered_map<std::string, std::vector<uint8_t>> resource_data);
 
   // Update a specific resource with new data
-  void UpdateResourceData(const std::string& resource_path,
-                          std::vector<uint8_t> resource_data);
+  void UpdateResourceData(
+    const std::string & resource_path,
+    std::vector<uint8_t> resource_data);
 
   // Returns the etag value for the given resource path if one exists, nullopt
   // otherwise
   std::optional<std::string> GetEtagForResoucePath(
-      const std::string& resource_path) const;
+    const std::string & resource_path) const;
 
- private:
+private:
   using GetResource = ::resource_retriever_interfaces::srv::GetResource;
 
-  void Get(const std::shared_ptr<GetResource::Request> request,
-           std::shared_ptr<GetResource::Response> response);
+  void Get(
+    const std::shared_ptr<GetResource::Request> request,
+    std::shared_ptr<GetResource::Response> response);
 
   explicit ResourceRetrieverService(NodeType node);
   void Init(NodeType node, std::string_view service_name);
@@ -75,7 +80,7 @@ class ResourceRetrieverService {
   // A map of resource data, where we go from [resource_id] => [etag, datablob]
   // Guarded by data_mutex_ for read/write access.
   std::unordered_map<std::string, std::pair<std::string, std::vector<uint8_t>>>
-      data_;
+  data_;
   // Guarded by the data_mutex and used to generate new etags for resources
   int64_t next_etag_value_ = 17;
   mutable std::shared_mutex data_mutex_;

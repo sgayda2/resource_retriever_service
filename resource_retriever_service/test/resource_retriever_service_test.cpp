@@ -13,16 +13,19 @@
 // limitations under the License.
 #include "resource_retriever_service/resource_retriever_service.hpp"
 
-#include <rclcpp/executors/single_threaded_executor.hpp>
-#include <rclcpp/node.hpp>
 #include <stdexcept>
 #include <string>
+
+#include <rclcpp/executors/single_threaded_executor.hpp>
+#include <rclcpp/node.hpp>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace resource_retriever_service {
-namespace {
+namespace resource_retriever_service
+{
+namespace
+{
 
 using ::resource_retriever_interfaces::srv::GetResource;
 
@@ -31,9 +34,11 @@ TEST(ResourceRetrieverService, GoodConstruction) {
   EXPECT_NE(ResourceRetrieverService::Create(*node), nullptr);
 }
 
-class ResourceRetrieverServiceTest : public ::testing::Test {
- protected:
-  void SetUp() override {
+class ResourceRetrieverServiceTest : public ::testing::Test
+{
+protected:
+  void SetUp() override
+  {
     executor_ = std::make_unique<rclcpp::executors::SingleThreadedExecutor>();
 
     client_node_ = rclcpp::Node::make_shared("test_client_node");
@@ -42,15 +47,16 @@ class ResourceRetrieverServiceTest : public ::testing::Test {
     executor_->add_node(server_node_);
 
     executor_thread_ = std::make_unique<std::thread>(
-        [executor = executor_.get()]() { executor->spin(); });
+      [executor = executor_.get()]() {executor->spin();});
 
     service_ = ResourceRetrieverService::Create(*client_node_);
 
     client_ = client_node_->create_client<GetResource>(
-        std::string(ResourceRetrieverService::kDefaultServiceName));
+      std::string(ResourceRetrieverService::kDefaultServiceName));
   }
 
-  void TearDown() override {
+  void TearDown() override
+  {
     executor_->cancel();
     executor_thread_->join();
 
@@ -62,7 +68,8 @@ class ResourceRetrieverServiceTest : public ::testing::Test {
   }
 
   GetResource::Response::SharedPtr SendRequest(
-      const std::string& resource_path, const std::string& resource_etag) {
+    const std::string & resource_path, const std::string & resource_etag)
+  {
     auto request = std::make_shared<GetResource::Request>();
     request->path = resource_path;
     request->etag = resource_etag;
@@ -79,7 +86,8 @@ class ResourceRetrieverServiceTest : public ::testing::Test {
   rclcpp::Client<GetResource>::SharedPtr client_;
 };
 
-TEST_F(ResourceRetrieverServiceTest, ConfirmSetUp) { /* Intentionally empty */ }
+TEST_F(ResourceRetrieverServiceTest, ConfirmSetUp) { /* Intentionally empty */
+}
 
 TEST_F(ResourceRetrieverServiceTest, GetWithEmpty) {
   auto response = SendRequest("", "");
@@ -189,7 +197,8 @@ TEST_F(ResourceRetrieverServiceTest, GetAfterClear) {
 }  // namespace
 }  // namespace resource_retriever_service
 
-int main(int argc, char** argv) {
+int main(int argc, char ** argv)
+{
   testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
   return RUN_ALL_TESTS();
