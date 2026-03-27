@@ -40,7 +40,11 @@
 #include <rclcpp/client.hpp>
 #include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/logger.hpp>
-#include <rclcpp/node.hpp>
+#include <rclcpp/node_interfaces/node_base_interface.hpp>
+#include <rclcpp/node_interfaces/node_interfaces.hpp>
+#include <rclcpp/node_interfaces/node_graph_interface.hpp>
+#include <rclcpp/node_interfaces/node_logging_interface.hpp>
+#include <rclcpp/node_interfaces/node_services_interface.hpp>
 #include <resource_retriever/plugins/retriever_plugin.hpp>
 #include <resource_retriever_interfaces/srv/get_resource.hpp>
 
@@ -57,7 +61,13 @@ class RosServiceResourceRetriever : public resource_retriever::plugins::Retrieve
   RosServiceResourceRetriever() = delete;
 
 public:
-  explicit RosServiceResourceRetriever(rclcpp::Node::SharedPtr ros_node);
+  using NodeType = rclcpp::node_interfaces::NodeInterfaces<
+      rclcpp::node_interfaces::NodeBaseInterface,
+      rclcpp::node_interfaces::NodeGraphInterface,
+      rclcpp::node_interfaces::NodeLoggingInterface,
+      rclcpp::node_interfaces::NodeServicesInterface>;
+
+  explicit RosServiceResourceRetriever(NodeType ros_node);
 
   ~RosServiceResourceRetriever() override = default;
 
@@ -70,12 +80,12 @@ public:
 private:
   rclcpp::Client<GetResource>::SharedPtr getServiceClient(const std::string & service_name);
 
-  // It should be safe to keep a shared pointer to the node here, because this
+  // It should be safe to keep a reference to the node interfaces here, because this
   // plugin will be destroyed with the resource retriever it is used with,
   // which should be destroyed along before the node abstraction is destroyed.
   // Also, since we're keeping callback groups and clients around, we need to
   // ensure the node stays around too.
-  rclcpp::Node::SharedPtr ros_node_;
+  NodeType ros_node_;
   rclcpp::CallbackGroup::SharedPtr callback_group_;
 
   // Maps between the server name and the client pointer that we use
