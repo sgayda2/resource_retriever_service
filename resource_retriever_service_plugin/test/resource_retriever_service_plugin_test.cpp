@@ -98,8 +98,8 @@ protected:
         request->etag);
       });
 
-      retriever_ = std::make_unique<RosServiceResourceRetriever>(*client_node_);
-    }
+    retriever_ = std::make_unique<RosServiceResourceRetriever>(*client_node_);
+  }
 
   void TearDown() override
   {

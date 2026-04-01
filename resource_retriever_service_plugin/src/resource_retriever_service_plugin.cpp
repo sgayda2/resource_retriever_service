@@ -54,19 +54,24 @@
 namespace resource_retriever_service_plugin
 {
 
-RosServiceResourceRetriever::RosServiceResourceRetriever(RosServiceResourceRetriever::NodeType ros_node)
+RosServiceResourceRetriever::RosServiceResourceRetriever(
+  RosServiceResourceRetriever::NodeType ros_node)
 : ros_node_(ros_node),
   logger_(ros_node_.get<rclcpp::node_interfaces::NodeLoggingInterface>()
-              ->get_logger()
-              .get_child("ros_service_resource_retriever"))
+    ->get_logger()
+    .get_child("ros_service_resource_retriever"))
 {
   // Create a client with a custom callback group that will not be included in the main executor.
-  callback_group_ = ros_node_.get<rclcpp::node_interfaces::NodeBaseInterface>()->create_callback_group(
+  callback_group_ =
+    ros_node_.get<rclcpp::node_interfaces::NodeBaseInterface>()
+    ->create_callback_group(
     rclcpp::CallbackGroupType::MutuallyExclusive,
     false);
 
   // Add the callback group to the executor so we can spin on it later.
-  executor_.add_callback_group(callback_group_, ros_node_.get<rclcpp::node_interfaces::NodeBaseInterface>());
+  executor_.add_callback_group(
+    callback_group_,
+    ros_node_.get<rclcpp::node_interfaces::NodeBaseInterface>());
 }
 
 std::string RosServiceResourceRetriever::name()

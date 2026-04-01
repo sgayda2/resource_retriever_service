@@ -62,10 +62,10 @@ class RosServiceResourceRetriever : public resource_retriever::plugins::Retrieve
 
 public:
   using NodeType = rclcpp::node_interfaces::NodeInterfaces<
-      rclcpp::node_interfaces::NodeBaseInterface,
-      rclcpp::node_interfaces::NodeGraphInterface,
-      rclcpp::node_interfaces::NodeLoggingInterface,
-      rclcpp::node_interfaces::NodeServicesInterface>;
+    rclcpp::node_interfaces::NodeBaseInterface,
+    rclcpp::node_interfaces::NodeGraphInterface,
+    rclcpp::node_interfaces::NodeLoggingInterface,
+    rclcpp::node_interfaces::NodeServicesInterface>;
 
   explicit RosServiceResourceRetriever(NodeType ros_node);
 
