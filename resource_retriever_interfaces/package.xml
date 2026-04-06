@@ -9,11 +9,11 @@
 
   <maintainer email="alejandro@openrobotics.org">Alejandro Hernandez Cordero</maintainer>
 
+  <license>Apache-2.0</license>
+
   <author email="stoyang@intrinsic.ai">Stoyan Gaydarov</author>
   <author email="william@openrobotics.org">William Woodall</author>
   <author>Eloy Briceño</author>
-
-  <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

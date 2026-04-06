@@ -8,10 +8,11 @@
   <description>A resource retriever plugin that relies on talking to a service (specified by resource_retriever_interfaces) for retrieving resources like meshes.</description>
 
   <maintainer email="stoyang@intrinsic.ai">Stoyan Gaydarov</maintainer>
-  <author email="william@openrobotics.org">William Woodall</author>
-  <author email="michael@openrobotics.org">Michael Carroll</author>
 
   <license>BSD</license>
+
+  <author email="william@openrobotics.org">William Woodall</author>
+  <author email="michael@openrobotics.org">Michael Carroll</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
