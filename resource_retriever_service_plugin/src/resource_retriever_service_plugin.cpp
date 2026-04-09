@@ -123,8 +123,8 @@ RosServiceResourceRetriever::get_shared(const std::string & url)
   }
 
   const std::string resource_path(
-    url.begin() + service_uri_prefix.size(),
-    url.begin() + colon_index);
+    url.begin() + colon_index + 1,
+    url.end());
 
   RCLCPP_DEBUG(
     this->logger_, "Getting resource: %s from %s", resource_path.c_str(),
@@ -151,11 +151,12 @@ RosServiceResourceRetriever::get_shared(const std::string & url)
   }
 
   // Request the resource with an etag, if it is set.
+  std::string etag_info = etag.empty() ? std::string() : (" with etag '" + etag + "'");
   RCLCPP_DEBUG(
     this->logger_,
     "Requesting resource '%s'%s.",
     resource_path.c_str(),
-    etag.empty() ? "" : (" with etag '" + etag + "'").c_str());
+    etag_info.c_str());
   auto req = std::make_shared<GetResource::Request>();
   req->path = resource_path;
   req->etag = etag;

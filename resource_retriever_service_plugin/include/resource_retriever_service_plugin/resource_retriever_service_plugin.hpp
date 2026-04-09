@@ -55,7 +55,7 @@ namespace resource_retriever_service_plugin
 class RosServiceResourceRetriever : public resource_retriever::plugins::RetrieverPlugin
 {
   static constexpr std::string_view service_uri_prefix = "service://";
-  static constexpr std::string_view service_uri_deliminator = ":";
+  static constexpr std::string_view service_uri_delimiter = ":";
   using GetResource = resource_retriever_interfaces::srv::GetResource;
 
   RosServiceResourceRetriever() = delete;

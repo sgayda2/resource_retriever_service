@@ -16,8 +16,10 @@
 #define RESOURCE_RETRIEVER_SERVICE__RESOURCE_RETRIEVER_SERVICE_HPP_
 
 #include <memory>
+#include <optional>
 #include <shared_mutex>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -61,7 +63,7 @@ public:
 
   // Returns the etag value for the given resource path if one exists, nullopt
   // otherwise
-  std::optional<std::string> GetEtagForResoucePath(
+  std::optional<std::string> GetEtagForResourcePath(
     const std::string & resource_path) const;
 
 private:

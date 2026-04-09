@@ -121,7 +121,7 @@ TEST_F(ResourceRetrieverServiceTest, GetWithValidPath) {
 TEST_F(ResourceRetrieverServiceTest, GetWithSameEtag) {
   std::vector<uint8_t> resource_data(2u, 3);
   service_->UpdateResourceData("valid_path", resource_data);
-  auto etag = service_->GetEtagForResoucePath("valid_path");
+  auto etag = service_->GetEtagForResourcePath("valid_path");
   ASSERT_TRUE(etag.has_value());
   ASSERT_FALSE(etag->empty());
 
@@ -137,7 +137,7 @@ TEST_F(ResourceRetrieverServiceTest, GetWithSameEtag) {
 TEST_F(ResourceRetrieverServiceTest, GetWithDifferentEtag) {
   std::vector<uint8_t> resource_data(2u, 3);
   service_->UpdateResourceData("valid_path", resource_data);
-  auto etag = service_->GetEtagForResoucePath("valid_path");
+  auto etag = service_->GetEtagForResourcePath("valid_path");
   ASSERT_TRUE(etag.has_value());
   ASSERT_FALSE(etag->empty());
   std::string bad_etag = *etag + *etag;
