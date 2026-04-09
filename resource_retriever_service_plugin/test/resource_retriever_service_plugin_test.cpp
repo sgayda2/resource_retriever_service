@@ -139,6 +139,21 @@ TEST_F(RosServiceResourceRetrieverTest, SimpleE2EGet)
   EXPECT_EQ(resource->data, resource_data);
 }
 
+TEST_F(RosServiceResourceRetrieverTest, ResourcePathExtraction)
+{
+  std::vector<uint8_t> resource_data(3u, 9);
+  GetResource::Response response;
+  response.status_code = GetResource::Response::OK;
+  response.body = resource_data;
+
+  // Expect the service to be called with the exact resource path after the ':'
+  EXPECT_CALL(mock_service_function_, Call(std::string("foo/bar"), _)).WillOnce(Return(response));
+
+  auto resource = retriever_->get_shared("service://test_service:foo/bar");
+  ASSERT_NE(nullptr, resource);
+  EXPECT_EQ(resource->data, resource_data);
+}
+
 TEST_F(RosServiceResourceRetrieverTest, ErrorStatusReturnsNull)
 {
   GetResource::Response response;

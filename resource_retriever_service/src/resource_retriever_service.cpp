@@ -92,7 +92,7 @@ void ResourceRetrieverService::UpdateResourceData(
     std::make_pair(std::to_string(next_etag_value_++), std::move(resource_data));
 }
 
-std::optional<std::string> ResourceRetrieverService::GetEtagForResoucePath(
+std::optional<std::string> ResourceRetrieverService::GetEtagForResourcePath(
   const std::string & resource_path) const
 {
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
@@ -120,7 +120,7 @@ void ResourceRetrieverService::Get(
     return;
   }
 
-  RCLCPP_ERROR(this->logger_, "requested resource path: %s", request->path.c_str());
+  RCLCPP_DEBUG(this->logger_, "requested resource path: %s", request->path.c_str());
   std::shared_lock<std::shared_mutex> lock(data_mutex_);
 
   auto itr = data_.find(request->path);
