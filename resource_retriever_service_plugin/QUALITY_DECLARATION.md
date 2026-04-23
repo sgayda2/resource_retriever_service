@@ -72,7 +72,7 @@ All pull requests must resolve related documentation changes before merging.
 
 ### License [3.iii]
 
-The license for `resource_retriever_service_plugin` is BSD, and a summary is in each source file, the type is declared in the [`package.xml`](./package.xml) manifest file, and a full copy of the license is in the [`LICENSE`](LICENSE) file.
+The license for `resource_retriever_service` is Apache 2.0, and a summary is in each source file, the type is declared in the [`package.xml`](./package.xml) manifest file, and a full copy of the license is in the [`../LICENSE`](LICENSE) file.
 
 There is an automated test which runs a linter that ensures each file has a license statement. [Here](http://build.ros2.org/view/Rpr/job/Rpr__resource_retriever_service_plugin__ubuntu_focal_amd64/lastCompletedBuild/testReport/resource_retriever_service_plugin/) can be found a list with the latest results of the various linters being run on the package.
 
