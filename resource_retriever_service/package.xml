@@ -4,7 +4,7 @@
   schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>resource_retriever_service</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>An in memory implementation of the resource_retriever_interfaces service.</description>
 
   <maintainer email="stoyang@intrinsic.ai">Stoyan Gaydarov</maintainer>
